@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- The Basics -->
+    <groupId>net.lightoze</groupId>
+    <artifactId>httpbasic-proxy</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>httpbasic</name>
+
+    <properties>
+        <!-- Sets the project's default encoding.
+       http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!--
+          Specify AppEngine version for your project. It should match SDK version pointed to
+          by ${gae.home} property (Typically, one used by your Eclipse plug-in)
+        -->
+        <gae.version>1.4.3</gae.version>
+
+        <!-- Upload to http://test.latest.<applicationName>.appspot.com by default -->
+        <gae.application.version>test</gae.application.version>
+        <!-- port defaults to 8080 -->
+        <gae.port>8080</gae.port>
+    </properties>
+
+    <profiles>
+        <!--
+          We can configure our integration server to activate this profile and
+          perform gae:deploy, thus uploading latest snapshot to the
+          http://1.latest.<applicationName>.appspot.com automatically
+        -->
+        <profile>
+            <id>integration-build</id>
+            <properties>
+                <gae.application.version>stage</gae.application.version>
+            </properties>
+        </profile>
+
+        <!--
+          This profile will activate automatically during release and upload
+          application to the http://2.latest.<applicationName>.appspot.com (We
+          might want to set the 2nd version as our applications Default version
+          to be accessible at http://<applicationName>.appspot.com)
+        -->
+        <profile>
+            <id>release-build</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <properties>
+                <!--
+                  During release, set application version in appengine-web.xml to 2
+                -->
+                <gae.application.version>release</gae.application.version>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <!--
+              The actual maven-gae-plugin. Type "mvn gae:run" to run project, "mvn gae:update"
+              to upload to GAE.
+            -->
+            <plugin>
+                <groupId>net.kindleit</groupId>
+                <artifactId>maven-gae-plugin</artifactId>
+                <version>0.8.4</version>
+                <configuration>
+                    <sdkDir>${gae.home}</sdkDir>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.kindleit</groupId>
+                        <artifactId>gae-runtime</artifactId>
+                        <version>${gae.version}</version>
+                        <type>pom</type>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!--
+              Upload application to the appspot automatically, during release:perform
+            -->
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <goals>gae:deploy</goals>
+                </configuration>
+            </plugin>
+
+            <!-- Java compiler version -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.wicket</groupId>
+            <artifactId>wicket</artifactId>
+            <version>1.4.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>0.9.24</version>
+        </dependency>
+
+        <!--
+          GAE libraries for local testing as described here:
+          http://code.google.com/appengine/docs/java/howto/unittesting.html
+        -->
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-labs</artifactId>
+            <version>${gae.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-stubs</artifactId>
+            <version>${gae.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-local-runtime</artifactId>
+            <version>${gae.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
