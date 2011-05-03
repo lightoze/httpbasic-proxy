@@ -5,10 +5,15 @@ import org.apache.wicket.protocol.http.HttpSessionStore;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.session.ISessionStore;
 
-public class GaeWicketApplication extends WebApplication {
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+public class Application extends WebApplication {
+    public static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("transactions-optional");
+
     @Override
     public Class<? extends Page> getHomePage() {
-        return HomePage.class;
+        return GenerateKey.class;
     }
 
     @Override
