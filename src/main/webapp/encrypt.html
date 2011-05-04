@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Secure proxy for web pages with HTTP basic authentication</title>
+    <script language="JavaScript" type="text/javascript" src="jsbn.js"></script>
+    <script language="JavaScript" type="text/javascript" src="jsbn2.js"></script>
+    <script language="JavaScript" type="text/javascript" src="prng4.js"></script>
+    <script language="JavaScript" type="text/javascript" src="rng.js"></script>
+    <script language="JavaScript" type="text/javascript" src="rsa.js"></script>
+    <script language="JavaScript" type="text/javascript" src="rsa2.js"></script>
+    <script language="JavaScript" type="text/javascript" src="base64.js"></script>
+    <script language="JavaScript" type="text/javascript">
+        function generate() {
+            var url = location.href.split("?")[1].split("#");
+            var rsa = new RSAKey();
+            rsa.setPublic(url[1], "10001");
+            var page = document.getElementById("page").value + "|" + document.getElementById("username").value + "|" + document.getElementById("password").value;
+            var encrypt = [];
+            while (page.length > 0) {
+                var len = page.length > 100 ? 100 : page.length;
+                encrypt.push(rsa.encrypt_b64(page.substr(0, len)));
+                page = page.substring(len, page.length);
+            }
+            var proxy = "/proxy/" + url[0] + "/" + encrypt.join("-");
+            var result = document.getElementById("result");
+            result.innerHTML = "Proxy page URL: <a href='" + proxy + "'>" + proxy.substr(0, 100) + "...</a>";
+        }
+    </script>
+</head>
+<body>
+<p style="text-decoration: underline; font-weight: bold;">Remember to add this page to your bookmarks.</p>
+
+<p><label>Page URL:<br/><input type="text" size="60" id="page"/></label></p>
+
+<p><label>User name:<br/><input type="text" size="20" id="username"/></label></p>
+
+<p><label>Password:<br/><input type="password" size="20" id="password"/></label></p>
+
+<button onclick="generate()">Get proxy page</button>
+
+<p id="result"/>
+</body>
+</html>

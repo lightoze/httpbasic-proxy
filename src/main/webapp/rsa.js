@@ -98,10 +98,10 @@ function RSAEncrypt(text) {
 }
 
 // Return the PKCS#1 RSA encryption of "text" as a Base64-encoded string
-//function RSAEncryptB64(text) {
-//  var h = this.encrypt(text);
-//  if(h) return hex2b64(h); else return null;
-//}
+function RSAEncryptB64(text) {
+  var h = this.encrypt(text);
+  if(h) return hex2b64(h); else return null;
+}
 
 // protected
 RSAKey.prototype.doPublic = RSADoPublic;
@@ -109,4 +109,4 @@ RSAKey.prototype.doPublic = RSADoPublic;
 // public
 RSAKey.prototype.setPublic = RSASetPublic;
 RSAKey.prototype.encrypt = RSAEncrypt;
-//RSAKey.prototype.encrypt_b64 = RSAEncryptB64;
+RSAKey.prototype.encrypt_b64 = RSAEncryptB64;

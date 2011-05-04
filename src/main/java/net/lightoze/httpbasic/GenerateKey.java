@@ -11,11 +11,15 @@
 
 package net.lightoze.httpbasic;
 
+import com.google.common.base.Strings;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.PropertyModel;
+
+import javax.persistence.EntityManager;
 
 /**
  * Page is responsible of
@@ -26,23 +30,45 @@ public class GenerateKey extends WebPage {
     private String message;
     private String publicKey;
     private String privateKey;
-    private Form form;
+    private WebMarkupContainer formbox;
 
     public GenerateKey() {
+        add(new Label("message", new PropertyModel<String>(this, "message")).setEscapeModelStrings(false));
 
-        add(new Label("message", new PropertyModel<String>(this, "message")));
 
-        form = new Form("form");
+        formbox = new WebMarkupContainer("formbox");
+        Form form = new KeyForm("form");
         form.add(new TextField<String>("publicKey", new PropertyModel<String>(this, "publicKey")));
         form.add(new TextField<String>("privateKey", new PropertyModel<String>(this, "privateKey")));
-        add(form);
+        formbox.add(form);
+        add(formbox);
     }
 
-    @Override
-    protected void onBeforeRender() {
-        super.onBeforeRender();
-        if (form.isSubmitted()) {
-            message = "Keys: " + publicKey + " " + privateKey;
+    public final class KeyForm extends Form {
+        public KeyForm(String id) {
+            super(id);
+        }
+
+        @Override
+        protected void onSubmit() {
+            publicKey = Strings.nullToEmpty(publicKey).trim();
+            privateKey = Strings.nullToEmpty(privateKey).trim();
+            if (publicKey.isEmpty() || privateKey.isEmpty()) {
+                message = "Please provide your keys.";
+                return;
+            }
+            UserKey key = new UserKey();
+            EntityManager em = Application.emf.createEntityManager();
+            try {
+                key.setPublicKey(publicKey);
+                key.setPrivateKey(privateKey);
+                em.persist(key);
+            } finally {
+                em.close();
+            }
+            message = String.format("Success. Now go to the <a href='/encrypt.html?%d#%s'>next page</a>.", key.getId(), key.getPublicKey());
+            clearInput();
+            formbox.setVisible(false);
         }
     }
 
